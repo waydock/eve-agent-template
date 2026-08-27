@@ -4,11 +4,16 @@ A chief-of-staff [eve](https://eve.dev) agent backed by [Waydock](https://waydoc
 your day, inbox, meetings, follow-ups, and tasks, and let the agent act on them
 with your approval.
 
-Waydock is wired in as an [MCP connection](https://eve.dev/docs/connections)
-(`agent/connections/waydock.ts`). The model discovers Waydock tools at runtime
-via `connection_search` and calls them as `waydock__<tool>`. Read tools flow
-freely; anything that sends, creates, or mutates (emails, nudges, tasks,
-preference changes) pauses for human approval via a per-call policy.
+The integration comes from Waydock's official eve registry item
+(`eve add @waydock/waydock`, source at
+[waydock/plugins](https://github.com/waydock/plugins/tree/main/eve)): an
+[MCP connection](https://eve.dev/docs/connections) plus two packaged skills
+(`waydock-mcp` usage guidance and a `waydock-morning-triage` procedure). The
+model discovers Waydock tools at runtime via `connection_search` and calls
+them as `waydock__<tool>`. The approval policy is manifest-driven and
+fail-closed: any tool Waydock's live manifest does not flag `readOnly` —
+including tools this file has never seen — pauses for human approval. To pick
+up connection updates later, re-run `npx eve add @waydock/waydock`.
 
 You bring your own model: the agent runs on your Vercel AI Gateway credentials
 (or any provider key you configure), so inference is billed to you, not to
@@ -27,9 +32,10 @@ Waydock.
    and put it in `.env.local` (and in Vercel env for production):
 
    ```bash
-   WAYDOCK_API_KEY=...   # sent as Authorization: Bearer <token>
-   # WAYDOCK_MCP_URL defaults to https://waydock.ai/api/mcp/stream
+   WAYDOCK_MCP_KEY=...   # sent as Authorization: Bearer <token>
    ```
+
+   See [waydock.ai/docs/authentication](https://waydock.ai/docs/authentication).
 
 3. Run it:
 
@@ -69,7 +75,9 @@ curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
 | --- | --- |
 | `agent/agent.ts` | Model config (`anthropic/claude-sonnet-5` via AI Gateway) |
 | `agent/instructions.md` | Identity and behavior |
-| `agent/connections/waydock.ts` | Waydock MCP connection, auth, and approval policy |
+| `agent/connections/waydock.ts` | Waydock MCP connection (from `@waydock/waydock`): auth + manifest-driven approval policy |
+| `agent/skills/waydock-mcp/` | Packaged skill: how to use Waydock tools well |
+| `agent/skills/waydock-morning-triage/` | Packaged skill: ranked morning triage procedure |
 | `agent/channels/eve.ts` | Default HTTP channel and route auth |
 | `agent/channels/telegram.ts` | Optional Telegram channel with user allowlist |
 
