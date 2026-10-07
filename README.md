@@ -46,6 +46,21 @@ Waydock.
    Try: "what does my day look like?", "anything urgent in my inbox?",
    "nudge the pending follow-ups" (this one will ask for approval).
 
+## Tide (optional)
+
+`agent/connections/tide.ts` adds [Tide](https://api.tide.chest.chat/mcp), the
+trading-signal ledger, as a second MCP connection (`tide__<tool>`). Read tools
+run freely; tools that change state (strategy params, research runs, paper
+signals, journal requests) pause for approval, as does any tool not on the
+read-only list. Tide's user-access admin tools are blocked. The
+`tide-signals` skill teaches the model how to read the ledger.
+
+```bash
+TIDE_MCP_KEY=...   # your tide_mcp_... key, sent as Authorization: Bearer <token>
+```
+
+Try: "any new Tide signals today?", "how did my strategies do this week?".
+
 ## Telegram (optional)
 
 `agent/channels/telegram.ts` puts the agent behind a Telegram bot with a strict
@@ -78,6 +93,8 @@ curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
 | `agent/connections/waydock.ts` | Waydock MCP connection (from `@waydock/waydock`): auth + manifest-driven approval policy |
 | `agent/skills/waydock-mcp/` | Packaged skill: how to use Waydock tools well |
 | `agent/skills/waydock-morning-triage/` | Packaged skill: ranked morning triage procedure |
+| `agent/connections/tide.ts` | Tide MCP connection: read tools open, writes gated, admin blocked |
+| `agent/skills/tide-signals/` | Skill: how to read Tide's signal ledger |
 | `agent/channels/eve.ts` | Default HTTP channel and route auth |
 | `agent/channels/telegram.ts` | Optional Telegram channel with user allowlist |
 
@@ -87,7 +104,7 @@ curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
 npx eve deploy
 ```
 
-Set the `WAYDOCK_*` (and any `TELEGRAM_*`) env vars on the Vercel project
+Set the `WAYDOCK_*` (and any `TIDE_*` / `TELEGRAM_*`) env vars on the Vercel project
 first. Before real use, replace `placeholderAuth()` in `agent/channels/eve.ts`
 with your auth provider — see
 [Authentication](https://eve.dev/docs/guides/auth-and-route-protection).
